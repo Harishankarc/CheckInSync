@@ -3,6 +3,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
 import Home from './pages/Home'
 import AttendenceList from './pages/AttendenceList'
+import Individual from './pages/Individual'
+import Login from './pages/Login'
+import SignUp from './pages/SignUp'
+import Profile from './pages/Profile'
 
 function Loaded() {
   const [loaded, setLoaded] = useState(false)
@@ -36,6 +40,10 @@ function App() {
         <Routes>
           {loaded ? <Route path="/" element={<Home />} /> : <Route path="/" element={<Loaded />} />}
           <Route path="/attendencelist" element={<AttendenceList />} />
+          <Route path="/individual" element={<Individual />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/loading" element={<Loaded />} />
         </Routes>
       </Router>

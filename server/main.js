@@ -14,7 +14,7 @@ db.serialize(() => {
 });
 
 const app = express();
-const port = 4000;
+const port = 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -28,16 +28,28 @@ app.post('/api/attendence/studentdetails', (req, res) => {
 
     const date_formatted = date.split(' ');
     const formatted_date = `${date_formatted[2]}-${date_formatted[1]}-${date_formatted[4]}`;
+    const checkingquery = `SELECT * FROM attendence WHERE date = '${formatted_date}' AND name = '${name}'`;
     const query = `INSERT INTO attendence (name, time, date) VALUES (?, ?, ?)`;
 
-    db.run(query, [name, date_formatted[3], formatted_date], (err) => {
+    db.get(checkingquery,(err,row)=>{
         if (err) {
             res.status(500).json({ "Database Error": err.message });
-            console.log(err);
-        } else {
-            res.status(200).json({ "message": "Student details added successfully" });
+        }else{
+            if(row){
+                res.status(200).json({ "message": "Student already present" });
+            }else{
+                db.run(query, [name, date_formatted[3], formatted_date], (err) => {
+                    if (err) {
+                        res.status(500).json({ "Database Error": err.message });
+                        console.log(err);
+                    } else {
+                        res.status(200).json({ "message": "Student details added successfully" });
+                    }
+                });
+            }
         }
-    });
+    })
+    
 });
 
 app.listen(port, () => {

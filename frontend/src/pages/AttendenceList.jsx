@@ -3,22 +3,34 @@ import Navbar from "../components/navbar";
 import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import studentscsa from "../utils/csa/studentList";
 
 export default function AttendenceList() {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedSub, setSelectedSub] = useState("MP");
     const [attendenceList, setAttendenceList] = useState([]);
-    useEffect(() => {
+    const [present, setPresent] = useState(0);
+    let students = studentscsa;
+      useEffect(() => {
         async function fetchData() {
             try {
                 const response = await axios.post(
-                    'http://localhost:5000/api/attendence/attendancelist', 
+                    'http://localhost:5000/api/attendence/attendancelist',
                     { date: selectedDate.toISOString().split('T')[0], sub: selectedSub }
                 );
-                console.log(response.data.data)
-    
+                
                 if (Array.isArray(response.data.data)) {
-                    setAttendenceList(response.data.data);
+                    const fetchedAttendance = response.data.data;
+                    setPresent(fetchedAttendance.length);
+                    
+                    const updatedStudents = students.map(student => {
+                        const matchedStudent = fetchedAttendance.find(s => (s.name).toLowerCase() === (student.name).toLowerCase());
+                        return matchedStudent
+                            ? { ...student, status: matchedStudent.por, time: matchedStudent.time, date: matchedStudent.date }
+                            : student;
+                    });
+    
+                    setAttendenceList(updatedStudents);
                 } else {
                     setAttendenceList([]);
                 }
@@ -28,7 +40,8 @@ export default function AttendenceList() {
             }
         }
         fetchData();
-    }, [selectedDate,selectedSub]);
+    }, [selectedDate, selectedSub]);
+    
     
     function genratePDF() {
         if (!selectedDate) {
@@ -53,7 +66,7 @@ export default function AttendenceList() {
                 row.name,
                 row.time?.slice(0, 5) || "N/A",
                 row.date,
-                row.por
+                row.status
             ]);
         });
     
@@ -101,11 +114,11 @@ export default function AttendenceList() {
                     <div className="flex flex-col sm:flex-row gap-5 items-center mb-5 p-4 bg-gray-100 rounded-lg shadow-md ">
                         <div className="w-full sm:w-auto text-center sm:text-left md:border-r-1 md:border-gray-400 md:pr-5 border-b-1 md:border-b-0 border-gray-400 md:pb-0 pb-4">
                             <p className="font-light text-gray-600 text-lg">Total Attendance</p>
-                            <p className="font-light text-2xl">100%</p>
+                            <p className="font-light text-2xl">{attendenceList.length}%</p>
                         </div>
                         <div className="w-full sm:w-auto text-center sm:text-left md:border-r-1 md:border-gray-400 md:pr-5">
                             <p className="font-light text-gray-600 text-lg">Today's Attendance</p>
-                            <p className="font-light text-2xl">{(attendenceList.length/100) * 100}%</p>
+                            <p className="font-light text-2xl">{(present/100) * 100}%</p>
                         </div>
                     </div>
 
@@ -124,12 +137,12 @@ export default function AttendenceList() {
                                 {attendenceList.map((attendence) => {
                                     return (
                                         <tr className="border-b border-gray-300" key={attendence.id}>
-                                            <td className="p-3 text-gray-600">{attendence.id}</td>
+                                            <td className="p-3 text-gray-600">{attendence.rollNo}</td>
                                             <td className="p-3 text-gray-600">{attendence.name}</td>
                                             <td className="p-3 text-gray-600">{(attendence.time).slice(0,5)}</td>
                                             <td className="p-3 text-gray-600">{attendence.date}</td>
-                                            <td className={`p-3 font-light ${attendence.por === 'Present' ? "text-green-600" : "text-red-600"}`}>
-                                                {attendence.por}
+                                            <td className={`p-3 font-light ${attendence.status === 'Present' ? "text-green-600" : "text-red-600"}`}>
+                                                {attendence.status}
                                             </td>
                                         </tr>
                                     );

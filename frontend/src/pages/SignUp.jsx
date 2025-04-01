@@ -13,13 +13,15 @@ export default function SignUp() {
 
         try {
             const response = await axios.post('http://localhost:5000/api/auth/signup', {
-                name: name,
+                name: name.toLowerCase(),
                 username: userName,
                 password: password
             });
 
             if (response.status === 200 || response.status === 201) { 
                 navigate('/login');
+            }else if (response.status === 400) {
+                alert('User already exists');
             } else {
                 console.error("Signup failed:", response.data);
             }

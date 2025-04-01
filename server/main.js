@@ -52,13 +52,24 @@ app.post('/api/auth/login',(req,res)=>{
 
 app.post('/api/auth/signup',(req,res)=>{
     const { name, username , password } = req.body;
+    checkingquery = `SELECT * FROM users WHERE username = '${username}'`
     query = `INSERT INTO users (name, username, password) VALUES ('${name}', '${username}', '${password}')`;
     if(name && username && password){
-        db.get(query,(err)=>{
+        db.get(checkingquery,(err,row)=>{
             if(err){
                 res.json({message:'Error Occured',status:500});
             }else{
-                res.json({message:'Signup Successfull',status:200});
+                if(row){
+                    res.json({message:'User Already Exists',status:400});
+                }else{
+                    db.run(query,(err)=>{
+                        if(err){
+                            res.json({message:'Error Occured',status:500});
+                        }else{
+                            res.json({message:'Signup Successfull',status:200});
+                        }
+                    })
+                }
             }
         })
     }else{
@@ -163,6 +174,38 @@ app.post('/api/attendence/attendancelist/individual', (req, res) => {
         res.status(200).json({ "data": rows.length > 0 ? rows : [] });
     });
 });
+
+app.post('/api/auth/profile', (req, res) => {
+    const { name } = req.body;
+    const sub = ["MP", "OS", "MATHS", "UHV", "DCN", "DBMS"];
+
+    let counts = {};
+
+    const query = `SELECT COUNT(*) as count FROM attendence WHERE name = ? AND sub = ?`;
+
+    let subjectCountPromises = sub.map(subject => {
+        return new Promise((resolve, reject) => {
+            db.get(query, [name.toLowerCase(), subject], (err, row) => {
+                if (err) {
+                    console.error("Database Error:", err.message);
+                    reject(err);
+                } else {
+                    counts[subject] = row.count;
+                    resolve();
+                }
+            });
+        });
+    });
+    Promise.all(subjectCountPromises)
+        .then(() => {
+            return res.status(200).json({ "data": counts });
+        })
+        .catch((err) => {
+            return res.status(500).json({ "Database Error": err.message });
+        });
+});
+
+
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

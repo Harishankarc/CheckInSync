@@ -28,6 +28,7 @@ function Loaded() {
 
 function App() {
   const [loaded, setLoaded] = useState(false)
+  const role = window.localStorage.getItem('role');
   useEffect(() => {
     setTimeout(() => {
       setLoaded(true)
@@ -39,6 +40,7 @@ function App() {
       <Router>
         <Routes>
           {loaded ? <Route path="/" element={<Home />} /> : <Route path="/" element={<Loaded />} />}
+          {/* {role === "Admin" ? <Route path='/admin' element={<Admin/>}></Route> : <Route path='/admin' element={<Error/>}></Route>} */}
           <Route path="/attendencelist" element={<AttendenceList />} />
           <Route path="/home" element={<Home />} />
           <Route path="/individual" element={<Individual />} />

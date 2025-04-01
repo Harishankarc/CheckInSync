@@ -18,7 +18,8 @@ db.serialize(() => {
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
         name TEXT,
         username TEXT, 
-        password TEXT
+        password TEXT,
+        aos TEXT DEFAULT 'Student'
     )`);
 });
 
@@ -39,7 +40,7 @@ app.post('/api/auth/login',(req,res)=>{
                 res.json({message:'Error Occured',status:500});
             }else{
                 if(row){
-                    res.json({message:'Login Successfull',status:200,token:row.username,name : row.name});
+                    res.json({message:'Login Successfull',status:200,token:row.username,name : row.name, role : row.aos});
                 }else{
                     res.json({message:'Invalid Credentials',status:401});
                 }
@@ -205,6 +206,45 @@ app.post('/api/auth/profile', (req, res) => {
         });
 });
 
+
+app.post('/api/auth/profile/recent', (req, res) => {
+    const { name } = req.body
+    const query = `SELECT * FROM attendence WHERE name = ? ORDER BY date DESC`;
+    db.all(query, [name.toLowerCase()], (err, rows) => {
+        if (err) {
+        return res.status(500).json({ "Database Error": err.message });
+        }else{
+            res.status(200).json({ "data": rows.length > 0 ? rows : [] });
+        }
+
+    })
+})
+
+app.post('/api/auth/profile/admin',(req,res)=>{
+    const { sub, hour } = req.body
+
+    if (!hour || hour <= 0) {
+        return res.status(400).json({ error: "Invalid 'hour' value. Must be a positive number." });
+    }
+
+    const query = `
+        SELECT name, 
+               (SELECT username FROM users WHERE users.name = attendence.name) AS email, 
+               sub, 
+               COUNT(*) as count 
+        FROM attendence 
+        WHERE sub = ? 
+        GROUP BY name
+    `;
+    db.all(query,[sub],(err,rows)=>{
+        if(err){
+        return res.status(500).json({ "Database Error": err.message });
+        }else{
+            const filteredrows = rows.filter(row => (row.count/hour) * 100 <= 75);
+            res.status(200).json({ "data": filteredrows});
+        }
+    })
+})
 
 
 app.listen(port, () => {

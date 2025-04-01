@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 export default function Navbar() {
     const navigate = useNavigate()
     const isAuth = JSON.parse(localStorage.getItem('Auth') || "false");
+    const role = window.localStorage.getItem('role');
     function HandleLogOut(e) {
         e.preventDefault()
         localStorage.removeItem('Auth'); 
@@ -35,6 +36,7 @@ export default function Navbar() {
             <div className="flex flex-wrap gap-3 md:gap-5 px-4 bg-gray-200 text-black py-2 transition-transform duration-300 hover:-translate-y-1 md:justify-start justify-center">
                 <Link className="hover:bg-black hover:text-white transition-all duration-500 rounded-lg px-3 py-1 text-sm md:text-base" to="/attendencelist">Attendance List</Link>
                 <Link className="hover:bg-black hover:text-white transition-all duration-500 rounded-lg px-3 py-1 text-sm md:text-base" to="/individual">Individual List</Link>
+                {/* {role === "Admin" ? <Link className="hover:bg-black hover:text-white transition-all duration-500 rounded-lg px-3 py-1 text-sm md:text-base" to="/admin">Admin</Link> : ""} */}
             </div>
         </div>
     )

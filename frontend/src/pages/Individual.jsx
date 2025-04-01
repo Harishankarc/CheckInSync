@@ -114,8 +114,8 @@ export default function Individual() {
                                         <th className="p-3 text-left font-light">Name</th>
                                         <th className="p-3 text-left font-light">Time</th>
                                         <th className="p-3 text-left font-light">Date</th>
-                                        <th className="p-3 text-left font-light">Status</th>
-                                    </tr>
+                                                                            <th className="p-3 text-left font-light">Status</th>
+</tr>
                                 </thead>
                                 <tbody>
                                     {attendenceList.map((attendence) => (

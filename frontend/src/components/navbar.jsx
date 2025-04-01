@@ -1,11 +1,13 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function Navbar() {
+    const navigate = useNavigate()
     const isAuth = JSON.parse(localStorage.getItem('Auth') || "false");
     function HandleLogOut(e) {
         e.preventDefault()
         localStorage.removeItem('Auth'); 
         localStorage.removeItem('username')
+        navigate('/home')
         window.location.reload()
     }
     return (

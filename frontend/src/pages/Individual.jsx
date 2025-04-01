@@ -30,8 +30,10 @@ export default function Individual() {
         const doc = new jsPDF();
         doc.setFont("helvetica", "bold");
         doc.text("Attendance Report", 14, 15);
+        doc.setFontSize(12);
+        doc.text(`Subject: ${attendenceList[0]?.sub || "N/A"}`, 14, 25);
         doc.setFontSize(10);
-        doc.text(`Date: ${selectedDate.toISOString().split('T')[0]}`, 14, 25);
+        doc.text(`Date: ${attendenceList[0].date}`, 14, 35);
 
         const tableColumn = ["Roll No", "Name", "Time", "Date", "Status"];
         const tableRows = [];
@@ -49,12 +51,12 @@ export default function Individual() {
         autoTable(doc, {
             head: [tableColumn],
             body: tableRows,
-            startY: 30,
+            startY: 45,
             styles: { fontSize: 10 },
             headStyles: { fillColor: [52, 73, 94] },
         });
 
-        doc.save(`Attendance_${selectedDate.toISOString().split('T')[0]}.pdf`);
+        doc.save(`Attendance_${attendenceList[0].date}.pdf`);
     };
 
     return (

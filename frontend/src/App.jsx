@@ -40,6 +40,7 @@ function App() {
         <Routes>
           {loaded ? <Route path="/" element={<Home />} /> : <Route path="/" element={<Loaded />} />}
           <Route path="/attendencelist" element={<AttendenceList />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/individual" element={<Individual />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />

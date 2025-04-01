@@ -6,7 +6,7 @@ import autoTable from "jspdf-autotable";
 
 export default function AttendenceList() {
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [selectedSub, setSelectedSub] = useState("");
+    const [selectedSub, setSelectedSub] = useState("MP");
     const [attendenceList, setAttendenceList] = useState([]);
     useEffect(() => {
         async function fetchData() {
@@ -15,6 +15,7 @@ export default function AttendenceList() {
                     'http://localhost:5000/api/attendence/attendancelist', 
                     { date: selectedDate.toISOString().split('T')[0], sub: selectedSub }
                 );
+                console.log(response.data.data)
     
                 if (Array.isArray(response.data.data)) {
                     setAttendenceList(response.data.data);
@@ -27,17 +28,25 @@ export default function AttendenceList() {
             }
         }
         fetchData();
-    }, [selectedDate]);
+    }, [selectedDate,selectedSub]);
+    
     function genratePDF() {
+        if (!selectedDate) {
+            console.error("Selected date is not defined");
+            return;
+        }
+        
         const doc = new jsPDF();
         doc.setFont("helvetica", "bold");
         doc.text("Attendance Report", 14, 15);
+        doc.setFontSize(12);
+        doc.text(`Subject: ${attendenceList[0]?.sub || "N/A"}`, 14, 25);
         doc.setFontSize(10);
-        doc.text(`Date: ${selectedDate.toISOString().split('T')[0]}`, 14, 25);
-
+        doc.text(`Date: ${selectedDate.toISOString().split('T')[0]}`, 14, 35);
+    
         const tableColumn = ["Roll No", "Name", "Time", "Date", "Status"];
         const tableRows = [];
-
+    
         attendenceList.forEach((row, index) => {
             tableRows.push([
                 index + 1,
@@ -47,17 +56,19 @@ export default function AttendenceList() {
                 row.por
             ]);
         });
-
+    
         autoTable(doc, {
             head: [tableColumn],
             body: tableRows,
-            startY: 30,
+            startY: 45,
             styles: { fontSize: 10 },
             headStyles: { fillColor: [52, 73, 94] },
         });
-
+    
         doc.save(`Attendance_${selectedDate.toISOString().split('T')[0]}.pdf`);
-    };
+    }
+    
+    
     
     return (
         <>

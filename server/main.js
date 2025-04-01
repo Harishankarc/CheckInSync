@@ -73,84 +73,80 @@ app.post('/api/attendence/studentdetails', (req, res) => {
         return res.status(400).json({ "message": "Please provide name and date" });
     }
 
-    const date_formatted = date.split(' ');
-    switch(date_formatted[1]){
-        case 'Jan' : date_formatted[1] = '01'; break;
-        case 'Feb' : date_formatted[1] = '02'; break;
-        case 'Mar' : date_formatted[1] = '03'; break;
-        case 'Apr' : date_formatted[1] = '04'; break;
-        case 'May' : date_formatted[1] = '05'; break;
-        case 'Jun' : date_formatted[1] = '06'; break;
-        case 'Jul' : date_formatted[1] = '07'; break;
-        case 'Aug' : date_formatted[1] = '08'; break;
-        case 'Sep' : date_formatted[1] = '09'; break;
-        case 'Oct' : date_formatted[1] = '10'; break;
-        case 'Nov' : date_formatted[1] = '11'; break;
-        case 'Dec' : date_formatted[1] = '12'; break;
-    }
-    const time = date_formatted[3].slice(0,5)
-    let sub=''
+    const date_parts = date.split(/\s+/); 
+
+    const month_map = {
+        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+        'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
+        'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+    };
+
+    const day = date_parts[2].padStart(2, '0');
+    const month = month_map[date_parts[1]];
+    const year = date_parts[4];
+    const time = date_parts[3].slice(0, 5); 
+
+    const formatted_date = `${year}-${month}-${day}`;
+
+    let sub = "Unknown";
     if (time >= "09:30" && time <= "10:30") {
         sub = "MP";
     } else if (time > "10:30" && time <= "11:30") {
         sub = "OS";
     } else if (time > "11:30" && time <= "12:30") {
-        sub = "MATHS"; 
-    }else if (time > "13:30" && time <= "14:30"){
+        sub = "MATHS";
+    } else if (time > "13:30" && time <= "14:30") {
         sub = "UHV";
-    }else if (time > "15:30" && time <= "16:30"){
+    } else if (time > "15:30" && time <= "16:30") {
         sub = "DCN";
-    }else if (time > "16:30" && time <= "17:30"){
+    } else if (time > "16:30" && time <= "17:30") {
         sub = "DBMS";
-    }   else {
-        sub = "Unknown"; 
     }
-    console.log(sub)
+    console.log(`Name: ${name}, Time: ${time}, Date: ${formatted_date}, Subject: ${sub}`);
 
-    const formatted_date = `${date_formatted[4]}-${date_formatted[1]}-${date_formatted[2]}`;
     const checkingquery = `SELECT * FROM attendence WHERE date = '${formatted_date}' AND name = '${name}' and sub = '${sub}'`;
     const query = `INSERT INTO attendence (name, time, date, por, sub) VALUES (?, ?, ?, ?, ?)`;
 
-    db.get(checkingquery,(err,row)=>{
+    db.get(checkingquery, (err, row) => {
         if (err) {
-            res.status(500).json({ "Database Error": err.message });
-        }else{
-            if(row){
-                res.status(200).json({ "message": "Student already present" });
-            }else{
-                db.run(query, [name, date_formatted[3], formatted_date, 'Present',sub], (err) => {
-                    if (err) {
-                        res.status(500).json({ "Database Error": err.message });
-                        console.log(err);
-                    } else {
-                        res.status(200).json({ "message": "Student details added successfully" });
-                    }
-                });
-            }
+            return res.status(500).json({ "Database Error": err.message });
         }
-    })
-    
-});
-app.post('/api/attendence/attendancelist',(req,res)=>{
-    const { date, sub } = req.body;
-    console.log(date)
-    const selectquery = `SELECT * FROM attendence WHERE date = '${date}' and sub = '${sub}'`;
-    if(date){
-        db.all(selectquery,(err,row)=>{
-            if(err){
-                res.status(500).json({ "Database Error": err.message });
-            }else{
-                if(row){
-                    res.status(200).json({ "data": row });
-                }else{
-                    res.status(200).json({ "data": [] });
+        if (row) {
+            return res.status(200).json({ "message": "Student already present" });
+        } else {
+            db.run(query, [name, time, formatted_date, 'Present', sub], (err) => {
+                if (err) {
+                    return res.status(500).json({ "Database Error": err.message });
                 }
+                return res.status(200).json({ "message": "Student details added successfully" });
+            });
+        }
+    });
+});
+
+
+app.post('/api/attendence/attendancelist', (req, res) => {
+    const { date, sub } = req.body;
+    console.log(`Received: date=${date}, sub=${sub}`);
+
+    const selectquery = `SELECT * FROM attendence WHERE date = ? AND sub = ?`;
+    if (date && sub) {
+        db.all(selectquery, [date, sub], (err, row) => {
+            if (err) {
+                console.error("Database Error:", err.message);
+                return res.status(500).json({ "Database Error": err.message });
+            } else {
+                console.log("Query Result:", row);
+                return res.status(200).json({ "data": row.length ? row : [] });
             }
-        })
-    }else{
-        console.log("No date provided");
+        });
+    } else {
+        console.log("No date or subject provided");
+        res.status(400).json({ "error": "Missing date or subject" });
     }
-})
+});
+
+
 
 app.post('/api/attendence/attendancelist/individual', (req, res) => {
     const { sub, name } = req.body;

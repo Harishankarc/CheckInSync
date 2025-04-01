@@ -5,7 +5,7 @@ import numpy as np
 import face_recognition as fr
 import time
 
-url = "http://localhost:5000/api/attendence/studentdetails"
+url = "http://localhost:6000/api/attendence/studentdetails"
 headers = {'Content-type': 'application/json'}
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 face_encodings = []

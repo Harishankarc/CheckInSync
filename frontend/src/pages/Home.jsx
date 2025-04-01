@@ -8,10 +8,10 @@ export default function Home() {
             </div>
             <div className="flex flex-col gap-4 justify-center items-center min-h-screen px-4 text-center">
                 <h1 className="text-5xl sm:text-3xl md:text-5xl lg:text-7xl leading-tight">
-                    MANAGE ALL YOUR
+                    MANAGE YOUR
                 </h1>
-                <h1 className="text-5xl sm:text-3xl md:text-5xl lg:text-7xl leading-tight">
-                    <span className="text-red-600">ATTENDANCE</span> EASILY
+                <h1 className="text-5xl sm:text-3xl md:text-5xl lg:text-7xl leading-tight text-red-600">
+                    ATTENDANCE
                 </h1>
                 <h1 className="text-5xl sm:text-3xl md:text-5xl lg:text-7xl leading-tight">
                     WITH <span className="outline-text">CHECKINSYNC</span>

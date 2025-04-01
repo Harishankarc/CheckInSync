@@ -16,12 +16,14 @@ export default function Login() {
             localStorage.setItem('name',response.data.name)
             localStorage.setItem('Auth',true)
             navigate('/')
+        }else{
+            alert('Invalid username or password')
         }
     }
     return (
         <div>
-            <div className="flex flex-col items-center justify-center h-screen">
-                <div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8 bg-white text-black rounded-2xl">
+            <div className="flex flex-col items-center justify-center h-screen mx-2 md:mx-0">
+                <div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8 bg-white text-black rounded-2xl ">
                     <div className="mx-auto max-w-lg text-center">
                         <h1 className="text-2xl font-bold sm:text-3xl">Welcome Back!</h1>
                         <p className="mt-4 text-gray-600">
